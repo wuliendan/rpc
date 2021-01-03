@@ -23,13 +23,13 @@ public class SocketClientProxy {
                 new Class<?>[]{clazz}, new InvocationHandler() {
                     @Override
                     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-                        RPCRequest RPCRequest = new RPCRequest();
-                        RPCRequest.setClassName(method.getDeclaringClass().getName());
-                        RPCRequest.setMethodName(method.getName());
-                        RPCRequest.setParamTypes(method.getParameterTypes());
-                        RPCRequest.setParams(args);
+                        RPCRequest rpcRequest = new RPCRequest();
+                        rpcRequest.setClassName(method.getDeclaringClass().getName());
+                        rpcRequest.setMethodName(method.getName());
+                        rpcRequest.setParamTypes(method.getParameterTypes());
+                        rpcRequest.setParams(args);
 
-                        return socketClient.invoke(RPCRequest, "127.0.0.1", 12000);
+                        return socketClient.invoke(rpcRequest, "127.0.0.1", 12000);
                     }
                 });
     }

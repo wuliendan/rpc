@@ -19,28 +19,28 @@ public class SocketClient {
     /**
      * 发送请求.
      *
-     * @param RPCRequest request
+     * @param rpcRequest request
      * @param ip ip地址
      * @param port port端口
      * @return return
      * @throws IOException e
      */
-    public Object invoke(final RPCRequest RPCRequest, final String ip, final int port) throws IOException {
+    public Object invoke(final RPCRequest rpcRequest, final String ip, final int port) throws IOException {
         socket = new Socket(ip, port);
         InputStream inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();
         ObjectOutputStream objectOutputStream;
         ObjectInputStream objectInputStream;
-        RPCResponse RPCResponse = null;
+        RPCResponse rpcResponse = null;
 
         try {
             objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(RPCRequest);
+            objectOutputStream.writeObject(rpcRequest);
             objectOutputStream.flush();
             objectInputStream = new ObjectInputStream(inputStream);
             Object result = objectInputStream.readObject();
             if (result instanceof RPCResponse) {
-                RPCResponse = (RPCResponse) result;
+                rpcResponse = (RPCResponse) result;
             } else {
                 throw new RuntimeException("返回参数不正确");
             }
@@ -52,7 +52,7 @@ public class SocketClient {
             socket.close();
         }
 
-        assert RPCResponse != null;
-        return RPCResponse.getObj();
+        assert rpcResponse != null;
+        return rpcResponse.getObj();
     }
 }

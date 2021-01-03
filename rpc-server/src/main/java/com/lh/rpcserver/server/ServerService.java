@@ -25,7 +25,7 @@ public class ServerService implements Runnable {
 
     private final Map<String, Class<?>> serviceRegistry = new HashMap<>();
 
-    private final RPCResponse RPCResponse = new RPCResponse();
+    private final RPCResponse rpcResponse = new RPCResponse();
 
     public ServerService(final Socket socketClient) {
         this.socketClient = socketClient;
@@ -54,26 +54,26 @@ public class ServerService implements Runnable {
 
             //2.获取请求数据，强转参数类型
             Object param = objectInputStream.readObject();
-            RPCRequest RPCRequest = null;
+            RPCRequest rpcRequest = null;
             if (!(param instanceof RPCRequest)) {
-                RPCResponse.setMessage("参数错误");
-                objectOutputStream.writeObject(RPCResponse);
+                rpcResponse.setMessage("参数错误");
+                objectOutputStream.writeObject(rpcResponse);
                 objectOutputStream.flush();
                 return;
             } else {
-                RPCRequest = (RPCRequest) param;
+                rpcRequest = (RPCRequest) param;
             }
 
             //3.查找并执行服务方法
-            log.info("要执行的类型为：" + RPCRequest.getClassName());
-            Class<?> service = serviceRegistry.get(RPCRequest.getClassName());
+            log.info("要执行的类型为：" + rpcRequest.getClassName());
+            Class<?> service = serviceRegistry.get(rpcRequest.getClassName());
             if (service != null) {
-                Method method = service.getMethod(RPCRequest.getMethodName(), RPCRequest.getParamTypes());
-                Object result = method.invoke(service.newInstance(), RPCRequest.getParams());
+                Method method = service.getMethod(rpcRequest.getMethodName(), rpcRequest.getParamTypes());
+                Object result = method.invoke(service.newInstance(), rpcRequest.getParams());
                 //4.得到结果并返回
-                RPCResponse.setObj(result);
+                rpcResponse.setObj(result);
             }
-            objectOutputStream.writeObject(RPCResponse);
+            objectOutputStream.writeObject(rpcResponse);
             objectOutputStream.flush();
             outputStream.close();
             inputStream.close();
