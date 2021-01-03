@@ -2,6 +2,9 @@ package com.lh.rpcclient.client;
 
 import com.lh.rpccore.entity.RPCRequest;
 import com.lh.rpccore.entity.RPCResponse;
+import com.lh.rpccore.exception.RequestTimeoutException;
+import com.lh.rpccore.serializer.KryoSerializer;
+import com.lh.rpccore.util.Object2Array;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +20,7 @@ public class SocketClient {
     }
 
     /**
-     * 发送请求.
+     * 使用 JDK 自带的序列化与反序列化.
      *
      * @param rpcRequest request
      * @param ip ip地址
@@ -31,7 +34,7 @@ public class SocketClient {
         OutputStream outputStream = socket.getOutputStream();
         ObjectOutputStream objectOutputStream;
         ObjectInputStream objectInputStream;
-        RPCResponse rpcResponse = null;
+        RPCResponse rpcResponse = new RPCResponse();
 
         try {
             objectOutputStream = new ObjectOutputStream(outputStream);
@@ -42,7 +45,7 @@ public class SocketClient {
             if (result instanceof RPCResponse) {
                 rpcResponse = (RPCResponse) result;
             } else {
-                throw new RuntimeException("返回参数不正确");
+                throw new RequestTimeoutException("返回参数不正确");
             }
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -52,7 +55,35 @@ public class SocketClient {
             socket.close();
         }
 
-        assert rpcResponse != null;
+        return rpcResponse.getObj();
+    }
+
+    /**
+     * 使用 Kryo 自带的序列化与反序列化.
+     * @param rpcRequest 接收信息
+     * @param ip ip地址
+     * @param port 端口
+     * @return object
+     * @throws IOException e
+     */
+    public Object invokeForKryo(final RPCRequest rpcRequest, final String ip, final int port) throws IOException {
+        socket = new Socket(ip, port);
+        RPCResponse rpcResponse = new RPCResponse();
+        KryoSerializer kryoSerializer = new KryoSerializer();
+
+        try (InputStream inputStream = socket.getInputStream();
+             OutputStream outputStream = socket.getOutputStream()) {
+            byte[] bytes = kryoSerializer.serialize(inputStream);
+            Object result = Object2Array.byteArrayToObject(bytes);
+            if (result instanceof RPCResponse) {
+                rpcResponse = (RPCResponse) result;
+            } else {
+                throw new RequestTimeoutException("返回参数不正确");
+            }
+        } finally {
+            socket.close();
+        }
+
         return rpcResponse.getObj();
     }
 }
