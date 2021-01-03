@@ -1,7 +1,7 @@
 package com.lh.rpcclient.client;
 
-import com.lh.rpccore.entity.Request;
-import com.lh.rpccore.entity.Response;
+import com.lh.rpccore.entity.RPCRequest;
+import com.lh.rpccore.entity.RPCResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,28 +19,28 @@ public class SocketClient {
     /**
      * 发送请求.
      *
-     * @param request request
+     * @param RPCRequest request
      * @param ip ip地址
      * @param port port端口
      * @return return
      * @throws IOException e
      */
-    public Object invoke(final Request request, final String ip, final int port) throws IOException {
+    public Object invoke(final RPCRequest RPCRequest, final String ip, final int port) throws IOException {
         socket = new Socket(ip, port);
         InputStream inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();
         ObjectOutputStream objectOutputStream;
         ObjectInputStream objectInputStream;
-        Response response = null;
+        RPCResponse RPCResponse = null;
 
         try {
             objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(request);
+            objectOutputStream.writeObject(RPCRequest);
             objectOutputStream.flush();
             objectInputStream = new ObjectInputStream(inputStream);
             Object result = objectInputStream.readObject();
-            if (result instanceof Response) {
-                response = (Response) result;
+            if (result instanceof RPCResponse) {
+                RPCResponse = (RPCResponse) result;
             } else {
                 throw new RuntimeException("返回参数不正确");
             }
@@ -52,7 +52,7 @@ public class SocketClient {
             socket.close();
         }
 
-        assert response != null;
-        return response.getObj();
+        assert RPCResponse != null;
+        return RPCResponse.getObj();
     }
 }

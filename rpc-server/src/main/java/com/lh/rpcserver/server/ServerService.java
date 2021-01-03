@@ -1,7 +1,7 @@
 package com.lh.rpcserver.server;
 
-import com.lh.rpccore.entity.Request;
-import com.lh.rpccore.entity.Response;
+import com.lh.rpccore.entity.RPCRequest;
+import com.lh.rpccore.entity.RPCResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
@@ -25,7 +25,7 @@ public class ServerService implements Runnable {
 
     private final Map<String, Class<?>> serviceRegistry = new HashMap<>();
 
-    private final Response response = new Response();
+    private final RPCResponse RPCResponse = new RPCResponse();
 
     public ServerService(final Socket socketClient) {
         this.socketClient = socketClient;
@@ -41,7 +41,6 @@ public class ServerService implements Runnable {
      *
      * @see Thread#run()
      */
-    @SuppressWarnings("checkstyle:SingleSpaceSeparator")
     @Override
     public void run() {
         try {
@@ -55,26 +54,26 @@ public class ServerService implements Runnable {
 
             //2.获取请求数据，强转参数类型
             Object param = objectInputStream.readObject();
-            Request request = null;
-            if (!(param instanceof Request)) {
-                response.setMessage("参数错误");
-                objectOutputStream.writeObject(response);
+            RPCRequest RPCRequest = null;
+            if (!(param instanceof RPCRequest)) {
+                RPCResponse.setMessage("参数错误");
+                objectOutputStream.writeObject(RPCResponse);
                 objectOutputStream.flush();
                 return;
             } else {
-                request = (Request) param;
+                RPCRequest = (RPCRequest) param;
             }
 
             //3.查找并执行服务方法
-            log.info("要执行的类型为：" + request.getClassName());
-            Class<?> service = serviceRegistry.get(request.getClassName());
+            log.info("要执行的类型为：" + RPCRequest.getClassName());
+            Class<?> service = serviceRegistry.get(RPCRequest.getClassName());
             if (service != null) {
-                Method method = service.getMethod(request.getMethodName(), request.getParamTypes());
-                Object result = method.invoke(service.newInstance(), request.getParams());
+                Method method = service.getMethod(RPCRequest.getMethodName(), RPCRequest.getParamTypes());
+                Object result = method.invoke(service.newInstance(), RPCRequest.getParams());
                 //4.得到结果并返回
-                response.setObj(result);
+                RPCResponse.setObj(result);
             }
-            objectOutputStream.writeObject(response);
+            objectOutputStream.writeObject(RPCResponse);
             objectOutputStream.flush();
             outputStream.close();
             inputStream.close();
@@ -90,7 +89,7 @@ public class ServerService implements Runnable {
      * @param server key
      * @param imp value
      */
-    public void registerServer(final Class server, final Class imp) {
+    public void registerServer(final Class<?> server, final Class<?> imp) {
         this.serviceRegistry.put(server.getName(), imp);
     }
 }

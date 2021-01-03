@@ -1,7 +1,7 @@
 package com.lh.rpcclient.proxy;
 
 import com.lh.rpcclient.client.SocketClient;
-import com.lh.rpccore.entity.Request;
+import com.lh.rpccore.entity.RPCRequest;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -23,13 +23,13 @@ public class SocketClientProxy {
                 new Class<?>[]{clazz}, new InvocationHandler() {
                     @Override
                     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-                        Request request = new Request();
-                        request.setClassName(method.getDeclaringClass().getName());
-                        request.setMethodName(method.getName());
-                        request.setParamTypes(method.getParameterTypes());
-                        request.setParams(args);
+                        RPCRequest RPCRequest = new RPCRequest();
+                        RPCRequest.setClassName(method.getDeclaringClass().getName());
+                        RPCRequest.setMethodName(method.getName());
+                        RPCRequest.setParamTypes(method.getParameterTypes());
+                        RPCRequest.setParams(args);
 
-                        return socketClient.invoke(request, "127.0.0.1", 12000);
+                        return socketClient.invoke(RPCRequest, "127.0.0.1", 12000);
                     }
                 });
     }

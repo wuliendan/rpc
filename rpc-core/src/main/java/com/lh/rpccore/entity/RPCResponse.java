@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class Response implements Serializable {
+public class RPCResponse implements Serializable {
     private String message;
 
     private Object obj;
