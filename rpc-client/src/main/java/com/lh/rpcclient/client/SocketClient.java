@@ -29,7 +29,6 @@ public class SocketClient {
      * @throws IOException e
      */
     public Object invoke(final RPCRequest rpcRequest, final String ip, final int port) throws IOException {
-        socket = new Socket(ip, port);
         InputStream inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();
         ObjectOutputStream objectOutputStream;
@@ -37,9 +36,13 @@ public class SocketClient {
         RPCResponse rpcResponse = new RPCResponse();
 
         try {
+            //1.创建socket客户端，根据指定地址选择远程服务提供者
+            socket = new Socket(ip, port);
+            //2.将远程服务调用所需的接口类，方法名，参数列表等编码后可以发送给服务端提供者
             objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.writeObject(rpcRequest);
             objectOutputStream.flush();
+            //3.同步阻塞等待服务器返回应答，获取应答后返回
             objectInputStream = new ObjectInputStream(inputStream);
             Object result = objectInputStream.readObject();
             if (result instanceof RPCResponse) {

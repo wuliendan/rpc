@@ -29,7 +29,7 @@ public class SocketClientProxy {
                         rpcRequest.setParamTypes(method.getParameterTypes());
                         rpcRequest.setParams(args);
 
-                        return socketClient.invokeForKryo(rpcRequest, "127.0.0.1", 12000);
+                        return socketClient.invoke(rpcRequest, "127.0.0.1", 12000);
                     }
                 });
     }
